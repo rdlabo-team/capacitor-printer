@@ -1,5 +1,6 @@
 import Foundation
 import Capacitor
+import UIKit
 
 /**
  * Please read the Capacitor iOS Plugin Development Guide
@@ -10,14 +11,31 @@ public class PrinterPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "PrinterPlugin"
     public let jsName = "Printer"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "echo", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "printWebView", returnType: CAPPluginReturnPromise)
     ]
-    private let implementation = Printer()
 
-    @objc func echo(_ call: CAPPluginCall) {
-        let value = call.getString("value") ?? ""
-        call.resolve([
-            "value": implementation.echo(value)
-        ])
+    @objc func printWebView(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            guard let webView = self.webView else {
+                call.reject("WebView not available")
+                return
+            }
+            
+            let printController = UIPrintInteractionController.shared
+            let printInfo = UIPrintInfo(dictionary: nil)
+            printInfo.outputType = .general
+            printController.printInfo = printInfo
+            printController.printFormatter = webView.viewPrintFormatter()
+            
+            printController.present(animated: true) { _, completed, error in
+                if let error = error {
+                    call.reject("Print failed: \(error.localizedDescription)")
+                } else if completed {
+                    call.resolve()
+                } else {
+                    call.reject("Print cancelled")
+                }
+            }
+        }
     }
 }

@@ -1,3 +1,3 @@
 export interface PrinterPlugin {
-  echo(options: { value: string }): Promise<{ value: string }>;
+  printWebView(): Promise<void>;
 }
