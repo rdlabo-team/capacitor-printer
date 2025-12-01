@@ -4,5 +4,6 @@ import type { PrinterPlugin } from './definitions';
 
 export class PrinterWeb extends WebPlugin implements PrinterPlugin {
   async printWebView(): Promise<void> {
+    console.log('Printing web view...');
   }
 }

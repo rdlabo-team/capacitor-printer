@@ -43,7 +43,8 @@
     "build": "npm run clean && npm run docgen && tsc && rollup -c rollup.config.mjs",
     "clean": "rimraf ./dist",
     "watch": "tsc --watch",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "release": "np --no-tests --any-branch"
   },
   "devDependencies": {
     "@capacitor/android": "^7.0.0",
@@ -54,6 +55,7 @@
     "@ionic/prettier-config": "^4.0.0",
     "@ionic/swiftlint-config": "^2.0.0",
     "eslint": "^8.57.0",
+    "np": "^10.2.0",
     "prettier": "^3.4.2",
     "prettier-plugin-java": "^2.6.6",
     "rimraf": "^6.0.1",
