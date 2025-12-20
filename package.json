@@ -1,6 +1,6 @@
 {
   "name": "@rdlabo/capacitor-printer",
-  "version": "0.1.1-0",
+  "version": "8.0.0-0",
   "description": "printer plugin for capacitor",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
