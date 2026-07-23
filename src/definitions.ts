@@ -2,6 +2,9 @@ export interface PrinterPlugin {
   /**
    * Present the printing user interface to print a file.
    *
+   * The promise settles after the operating system no longer needs the source
+   * file, so the file can be safely deleted in a `finally` block.
+   *
    * Only available on Android and iOS.
    */
   printFile(options: PrintFileOptions): Promise<void>;

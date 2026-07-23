@@ -82,8 +82,7 @@ public class PrinterPlugin extends Plugin {
         try {
             PrintHelper printHelper = new PrintHelper(getContext());
             printHelper.setScaleMode(PrintHelper.SCALE_MODE_FIT);
-            printHelper.printBitmap(jobName, uri);
-            call.resolve();
+            printHelper.printBitmap(jobName, uri, () -> call.resolve());
         } catch (FileNotFoundException | SecurityException exception) {
             call.reject("Unable to read file: " + exception.getLocalizedMessage(), exception);
         }
@@ -103,8 +102,7 @@ public class PrinterPlugin extends Plugin {
             return;
         }
 
-        printManager.print(jobName, new PdfPrintDocumentAdapter(uri, jobName), new PrintAttributes.Builder().build());
-        call.resolve();
+        printManager.print(jobName, new PdfPrintDocumentAdapter(uri, jobName, call), new PrintAttributes.Builder().build());
     }
 
     private InputStream openInputStream(Uri uri) throws FileNotFoundException {
@@ -139,10 +137,13 @@ public class PrinterPlugin extends Plugin {
 
         private final Uri uri;
         private final String name;
+        private final PluginCall call;
+        private volatile String failureMessage;
 
-        private PdfPrintDocumentAdapter(Uri uri, String name) {
+        private PdfPrintDocumentAdapter(Uri uri, String name, PluginCall call) {
             this.uri = uri;
             this.name = name;
+            this.call = call;
         }
 
         @Override
@@ -168,7 +169,9 @@ public class PrinterPlugin extends Plugin {
             CancellationSignal cancellationSignal,
             WriteResultCallback callback
         ) {
+            failureMessage = null;
             new Thread(() -> {
+                boolean cancelled = false;
                 try (
                     InputStream input = openInputStream(uri);
                     OutputStream output = new FileOutputStream(destination.getFileDescriptor())
@@ -177,17 +180,32 @@ public class PrinterPlugin extends Plugin {
                     int length;
                     while ((length = input.read(buffer)) != -1) {
                         if (cancellationSignal.isCanceled()) {
-                            callback.onWriteCancelled();
-                            return;
+                            cancelled = true;
+                            break;
                         }
                         output.write(buffer, 0, length);
                     }
-                    callback.onWriteFinished(new android.print.PageRange[] { android.print.PageRange.ALL_PAGES });
                 } catch (IOException | SecurityException exception) {
+                    failureMessage = exception.getLocalizedMessage();
                     callback.onWriteFailed(exception.getLocalizedMessage());
+                    return;
+                }
+                if (cancelled) {
+                    callback.onWriteCancelled();
+                } else {
+                    callback.onWriteFinished(new android.print.PageRange[] { android.print.PageRange.ALL_PAGES });
                 }
             })
                 .start();
+        }
+
+        @Override
+        public void onFinish() {
+            if (failureMessage == null) {
+                call.resolve();
+            } else {
+                call.reject("Unable to print file: " + failureMessage);
+            }
         }
     }
 }
