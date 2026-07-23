@@ -58,7 +58,12 @@ public class PrinterPlugin: CAPPlugin, CAPBridgedPlugin {
             let printController = UIPrintInteractionController.shared
             let printInfo = UIPrintInfo(dictionary: nil)
             printInfo.outputType = .general
-            printInfo.jobName = call.getString("name") ?? "Document"
+            let requestedName = call.getString("name")?.trimmingCharacters(in: .whitespacesAndNewlines)
+            if let requestedName, !requestedName.isEmpty {
+                printInfo.jobName = requestedName
+            } else {
+                printInfo.jobName = "Document"
+            }
             printController.printInfo = printInfo
             printController.printFormatter = webView.viewPrintFormatter()
             self.present(printController, call: call)

@@ -17,7 +17,8 @@ export interface PrinterPlugin {
 
 export interface PrintFileOptions {
   /**
-   * The path to the file. Both file paths and file/content URLs are supported.
+   * The path to the file. Android supports file paths, `file://` URLs, and
+   * `content://` URLs. iOS supports file paths and local `file://` URLs.
    */
   path: string;
 

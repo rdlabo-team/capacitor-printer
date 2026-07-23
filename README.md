@@ -63,10 +63,10 @@ Present the printing user interface to print the web view content.
 
 #### PrintFileOptions
 
-| Prop           | Type                | Description                                                                |
-| -------------- | ------------------- | -------------------------------------------------------------------------- |
-| **`path`**     | <code>string</code> | The path to the file. Both file paths and file/content URLs are supported. |
-| **`mimeType`** | <code>string</code> | The MIME type of the file. Only used on Android.                           |
+| Prop           | Type                | Description                                                                                                                                 |
+| -------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`path`**     | <code>string</code> | The path to the file. Android supports file paths, `file://` URLs, and `content://` URLs. iOS supports file paths and local `file://` URLs. |
+| **`mimeType`** | <code>string</code> | The MIME type of the file. Only used on Android.                                                                                            |
 
 
 #### PrintOptions

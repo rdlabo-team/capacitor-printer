@@ -43,7 +43,7 @@ public class PrinterPlugin extends Plugin {
 
         Uri uri = toUri(path);
         String jobName = getFileName(uri);
-        String normalizedMimeType = mimeType.toLowerCase(Locale.ROOT);
+        String normalizedMimeType = mimeType.split(";", 2)[0].trim().toLowerCase(Locale.ROOT);
         getActivity().runOnUiThread(() -> {
             if (isSupportedImageMimeType(normalizedMimeType)) {
                 printImage(call, uri, jobName);
@@ -70,7 +70,7 @@ public class PrinterPlugin extends Plugin {
                 return;
             }
 
-            String jobName = call.getString("name", DEFAULT_JOB_NAME);
+            String jobName = normalizeJobName(call.getString("name"));
             PrintDocumentAdapter printAdapter = webView.createPrintDocumentAdapter(jobName);
             printManager.print(jobName, printAdapter, new PrintAttributes.Builder().build());
 
@@ -124,6 +124,10 @@ public class PrinterPlugin extends Plugin {
     private static String getFileName(Uri uri) {
         String fileName = uri.getLastPathSegment();
         return fileName == null || fileName.trim().isEmpty() ? DEFAULT_JOB_NAME : fileName;
+    }
+
+    private static String normalizeJobName(String name) {
+        return name == null || name.trim().isEmpty() ? DEFAULT_JOB_NAME : name.trim();
     }
 
     private static boolean isSupportedImageMimeType(String mimeType) {
